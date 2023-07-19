@@ -1,15 +1,26 @@
 import logo from './logo.svg';
 import './App.css';
 import React, { useState, useEffect } from 'react';
-import {Button} from 'react-bootstrap';
+import { Button, Form } from 'react-bootstrap';
 
 function App() {
   
   const [content, setContent] = useState([])
+  const [spaceName, setSpaceName] = useState("")
+
+  const handleInputChange = (event) => {
+    setSpaceName(event.target.value);
+  };
 
   var getDocuments = async () => {
     try {
-      const response = await fetch('/api/documents', {})
+      const response = await fetch('/api/documents', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ spaceName }),
+      });
       
       console.log(response)
 
@@ -39,6 +50,13 @@ function App() {
               <p>{item.body}</p>
             </body>
           ))}
+
+      <Form.Control
+          type="text"
+          placeholder="Enter space name"
+          value={spaceName}
+          onChange={handleInputChange}
+        />
       <Button onClick={getDocuments} variant="primary" type="button">Get Documents</Button>
     </div>
   );
