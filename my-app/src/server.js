@@ -4,12 +4,17 @@ const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
 const pdfSaver = require('pdfkit')
+const { spawn } = require('child_process');
+const doc = require('pdfkit');
 
 //Makes an instance of the express application
 const app = express();
 
 //Parses incoming JSON 
 app.use(express.json());
+
+let lastPythonResponse = "";
+let doc_paths = [];
 
 // Function to remove HTML tags from content
 const removeHtmlTags = (content) => {
@@ -40,12 +45,13 @@ const fetchData = async (url, auth) => {
 const savePDF = (page) => {
     const {title, body} = page;
 
+
     if (!fs.existsSync(`${__dirname}/pdfs/`)) {
       fs.mkdirSync(`${__dirname}/pdfs/`);
     }
 
     const pdfPath = `${__dirname}/pdfs/${title}.pdf`;
-    
+    doc_paths.push(pdfPath)
     if (fs.existsSync(pdfPath)) {
       return;
     }
@@ -107,8 +113,47 @@ app.post('/api/documents', async (req, res) => {
         console.error('Error fetching documents:', error.message);
         res.status(500).json({ error: 'Failed to fetch documents' });
       }
+
+      start_python();
 });
 
+const start_python = () => {
+
+  const documentPaths = doc_paths
+  doc_paths=[]
+  const apiKey = "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";
+
+  pythonProcess = spawn('python', ['./run.py', apiKey, ...documentPaths]);
+
+    // Handle Python process termination or crash
+    pythonProcess.on('close', (code) => {
+        console.error(`Python script exited with code ${code}`);
+        // You can restart the Python process or notify the frontend about this
+    });
+
+    res.json({ message: 'Python script started' });
+
+}
+
+app.post('/api/send-to-python', (req, res) => {
+    const { question } = req.body;
+    
+    if (pythonProcess) {
+        // Reset the last response
+        lastPythonResponse = "";
+
+        // Write the question to the Python script
+        pythonProcess.stdin.write(question + '\n');
+
+        // Listen for Python's stdout
+        pythonProcess.stdout.on('data', (data) => {
+            lastPythonResponse = data.toString();
+        });
+        
+        console.log(lastPythonResponse)
+    }
+    
+});
 
 const port = 5000;
 app.listen(port, ()=> {
