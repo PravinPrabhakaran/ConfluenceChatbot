@@ -6,6 +6,7 @@ const axios = require('axios');
 const pdfSaver = require('pdfkit')
 const { spawn } = require('child_process');
 const doc = require('pdfkit');
+const dotenv = require('dotenv').config({ path: '/Users/fahad.hewad/vscode/ConfluenceChatbot/my-app/src/keys.env' });
 
 //Makes an instance of the express application
 const app = express();
@@ -15,7 +16,6 @@ app.use(express.json());
 
 let lastPythonResponse = "";
 let doc_paths = [];
-
 // Function to remove HTML tags from content
 const removeHtmlTags = (content) => {
   // Remove HTML tags
@@ -77,7 +77,7 @@ app.post('/api/documents', async (req, res) => {
 
     try {
 
-        const spaceAuth = Buffer.from('Pravin.Prabhakaran@comparethemarket.com:ATATT3xFfGF0g46tSBJGzhPh_MzoAUr8C9kGEL3OcW3QOuJCvrco3_Es87AqAede9TZPvViOVvebGdpwFszSGVPTGjzcU3qKwrRd1pd2ewOdNUzCQTk_tWnI_frvnZ8v-lPjDUFhSgkyNyZejXFQ301KTFoekUDx2urqmlTDyTRBzdFl0cjnglw=E41A82E1').toString('base64');
+        const spaceAuth = Buffer.from(`${process.env.confluence_email}:${process.env.confluence_API_KEY}`).toString('base64');
 
         // First API call to get the ID of a Space
         const spaceIDCall = `https://comparethemarket.atlassian.net/wiki/rest/api/space/${spaceName}`
@@ -108,20 +108,22 @@ app.post('/api/documents', async (req, res) => {
         });
 
         formattedContent.map(savePDF)
-        res.json(formattedContent);
       } catch (error) {
         console.error('Error fetching documents:', error.message);
         res.status(500).json({ error: 'Failed to fetch documents' });
       }
 
       start_python();
+
+      // add res that sends back that python is starting
+
 });
 
 const start_python = () => {
 
   const documentPaths = doc_paths
   doc_paths=[]
-  const apiKey = "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";
+  const apiKey = process.env.GPT_API_KEY
 
   pythonProcess = spawn('python', ['./run.py', apiKey, ...documentPaths]);
 
