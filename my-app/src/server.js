@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path');
 const fs = require('fs');
 const axios = require('axios');
+const pdfSaver = require('pdfkit')
 
 //Makes an instance of the express application
 const app = express();
@@ -36,14 +37,42 @@ const fetchData = async (url, auth) => {
     }
   };
 
+const savePDF = (page) => {
+    const {title, body} = page;
+
+    if (!fs.existsSync(`${__dirname}/pdfs/`)) {
+      fs.mkdirSync(`${__dirname}/pdfs/`);
+    }
+
+    const pdfPath = `${__dirname}/pdfs/${title}.pdf`;
+    
+    if (fs.existsSync(pdfPath)) {
+      return;
+    }
+    
+    const doc = new pdfSaver();
+    const stream = fs.createWriteStream(pdfPath)
+
+    doc.text(title);
+    doc.moveDown();
+    doc.text(body);
+
+    doc.pipe(stream)
+    doc.end()
+
+    stream.on('finish', () => {
+      console.log(`PDF Saved : ${title}.pdf`)
+    })
+
+  }
 
 app.post('/api/documents', async (req, res) => {
     const { spaceName } = req.body;
 
     try {
 
-        const spaceAuth = Buffer.from('Pravin.Prabhakaran@comparethemarket.com:ATATT3xFfGF0UZGUOEbU1mjNS18ci71Wu8v5_oS0eI4QqOht-xBEb7wLwj1b4aEOLfBdJknxeJbqVUB1BPbvfYCLgMeAbqcv4y7tak3at4v7OIwczChbXWedeFpc0--n47AHxyluNOw5DiI7NmXwAVjvzcKmzU2MuiwDgi-Yc71JPJd5XM5FAig=EED69AC9').toString('base64');
-
+        const spaceAuth = Buffer.from('Pravin.Prabhakaran@comparethemarket.com:ATASGVPTGjzcU3qKwrRd1pd2ewOdNUzCQTk_tWnI_frvnZ8v-lPjDUFhSgkyNyZejXFQ301KTFoekUDx2urqmlTDyTRBzdFl0cjnglw=E41A82E1').toString('base64');
+d
         // First API call to get the ID of a Space
         const spaceIDCall = `https://comparethemarket.atlassian.net/wiki/rest/api/space/${spaceName}`
         const spaceIDData = await fetchData(spaceIDCall, spaceAuth);
@@ -71,7 +100,8 @@ app.post('/api/documents', async (req, res) => {
             body: removeHtmlTags(contentData.body.storage.value), // Assuming 'body.storage.value' contains the content
           };
         });
-    
+
+        formattedContent.map(savePDF)
         res.json(formattedContent);
       } catch (error) {
         console.error('Error fetching documents:', error.message);
