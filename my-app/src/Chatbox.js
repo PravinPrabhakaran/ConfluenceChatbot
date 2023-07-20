@@ -14,7 +14,7 @@ function Chatbox(props) {
     <Card className="chat-box rounded-lg shadow-l" style={{...borderRadiusStyle, ...alignSelfStyle}}>
         <Card.Body>
         <div className="message">
-            <p>Hello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?ello, how can I help you?asdasdaasdjasidjsaidjisajidiasdijajid saidjisajidiasdijajid saidjisajidiasdijajid saidjisajidiasdijajid saidjisajidiasdijajid saidjisajidiasdijajid</p>
+            <p>{props.text}</p>
         </div>
         </Card.Body>
     </Card>

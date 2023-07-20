@@ -7,7 +7,6 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   
-  const [content, setContent] = useState([])
   const [spaceName, setSpaceName] = useState("")
   const [spaceSelected, setSpaceSelected] = useState(false)
   const [messages, setMessages] = useState([])
@@ -18,7 +17,7 @@ function App() {
 
   var getDocuments = async () => {
 
-    setMessages(messages=>[...messages, spaceName])
+    setMessages(messages=>[...messages, {text:spaceName, bot:false}])
 
     if (spaceSelected) {
       const response = await fetch('/api/send-to-python', {
@@ -40,15 +39,11 @@ function App() {
           body: JSON.stringify({ spaceName }),
         });
       
-        console.log(response)
-
         if (!response.ok) {
-          console.log(response)
           console.error('Error sending message');
         }
   
         const data = await response.json();
-        setContent(content => data);
       }
   
       catch (error) {
@@ -73,7 +68,12 @@ function App() {
           <div className="messageContainer">      
             <Container className="d-flex flex-column">
               <Chatbox bot={true} text={"Enter the name of a Confluence Space"}/>
-              <Chatbox bot={false} text={""} />
+              
+              {
+                messages.map((messagePair) => (
+                  <Chatbox bot={messagePair.bot} text={messagePair.text} />
+                ))
+              }
 
               <br />
             </Container>
