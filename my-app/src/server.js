@@ -71,8 +71,8 @@ app.post('/api/documents', async (req, res) => {
 
     try {
 
-        const spaceAuth = Buffer.from('Pravin.Prabhakaran@comparethemarket.com:ATASGVPTGjzcU3qKwrRd1pd2ewOdNUzCQTk_tWnI_frvnZ8v-lPjDUFhSgkyNyZejXFQ301KTFoekUDx2urqmlTDyTRBzdFl0cjnglw=E41A82E1').toString('base64');
-d
+        const spaceAuth = Buffer.from('Pravin.Prabhakaran@comparethemarket.com:ATATT3xFfGF0g46tSBJGzhPh_MzoAUr8C9kGEL3OcW3QOuJCvrco3_Es87AqAede9TZPvViOVvebGdpwFszSGVPTGjzcU3qKwrRd1pd2ewOdNUzCQTk_tWnI_frvnZ8v-lPjDUFhSgkyNyZejXFQ301KTFoekUDx2urqmlTDyTRBzdFl0cjnglw=E41A82E1').toString('base64');
+
         // First API call to get the ID of a Space
         const spaceIDCall = `https://comparethemarket.atlassian.net/wiki/rest/api/space/${spaceName}`
         const spaceIDData = await fetchData(spaceIDCall, spaceAuth);
