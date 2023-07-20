@@ -10,12 +10,15 @@ function App() {
   const [content, setContent] = useState([])
   const [spaceName, setSpaceName] = useState("")
   const [spaceSelected, setSpaceSelected] = useState(false)
+  const [messages, setMessages] = useState([])
 
   const handleInputChange = (event) => {
     setSpaceName(event.target.value);
   };
 
   var getDocuments = async () => {
+
+    setMessages(messages=>[...messages, spaceName])
 
     if (spaceSelected) {
       const response = await fetch('/api/send-to-python', {
@@ -69,9 +72,8 @@ function App() {
 
           <div className="messageContainer">      
             <Container className="d-flex flex-column">
-              <Chatbox />
-              <Chatbox />
-              <Chatbox />
+              <Chatbox bot={true} text={"Enter the name of a Confluence Space"}/>
+              <Chatbox bot={false} text={""} />
 
               <br />
             </Container>
