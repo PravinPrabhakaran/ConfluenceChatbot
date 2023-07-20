@@ -12,7 +12,7 @@
   justify-content: center;
   height: 80vh;
   border-radius: 1%;
-  overflow-y: scroll;
+  overflow-y: auto;
 
 }
 
@@ -32,7 +32,7 @@
 }
 
 .chat-box {
-  border-top-left-radius: 0px !important;
+  font-size:11pt;
   max-width:90%;
   text-overflow: wrap;
   margin-top: 3%;
