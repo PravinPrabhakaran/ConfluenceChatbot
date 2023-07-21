@@ -1,27 +1,59 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form } from 'react-bootstrap';
-import Chatbox from './Chatbox.js'
+import Chatbox from './Chatbox.js';
+import { w3cwebsocket as WebSocketClient } from 'websocket';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   
   const [spaceName, setSpaceName] = useState("")
-  const [spaceSelected, setSpaceSelected] = useState(false)
   const [messages, setMessages] = useState([])
+  const [websocketClient, setWebsocketClient] = useState(null);
+  const [spaceSelected, setSpaceSelected] = useState(false);
 
   const handleInputChange = (event) => {
     setSpaceName(event.target.value);
+  };
+
+  useEffect(() => {
+    if (spaceSelected) {
+      const client = new WebSocketClient('ws://localhost:5000'); // Replace with your backend WebSocket server URL
+      client.onopen = () => {
+        console.log('WebSocket Client Connected');
+        setWebsocketClient(client);
+      };
+
+      client.onmessage = (message) => {
+        setMessages((messages) => [message, ...messages]);
+      };
+
+      client.onclose = () => {
+        console.log('WebSocket Client Disconnected');
+        setWebsocketClient(null);
+      };
+
+      return () => {
+        if (client) {
+          client.close();
+        }
+      };
+    }
+  }, [spaceSelected]);
+ 
+  const sendToSocket = (message) => {
+    if (websocketClient && websocketClient.readyState === WebSocket.OPEN) {
+      websocketClient.send(message);
+    }
   };
 
   var getDocuments = async () => {
 
     setMessages(messages=>[...messages, {text:spaceName, bot:false}])
 
-    if (spaceSelected) {
-      console.log("Sending to python the question (send-to-python)")
-      const response = await fetch('/api/send-to-python', {
+    try {
+      const response = await fetch('/api/documents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -29,38 +61,21 @@ function App() {
         body: JSON.stringify({ spaceName }),
       });
 
-    }
-    else {
-      console.log("Sending the spacename to collect docs (documents)")
-      setSpaceSelected(spaceSelected=>true)
-      console.log(spaceSelected)
-      try {
-        const response = await fetch('/api/documents', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ spaceName }),
-        });
-
-        const data = await response.json();
-      
-        if (!response.ok) {
-          console.error('Error sending message');
-        }
-
-      }
-  
-      catch (error) {
-        console.log("hello2")
-        console.error(error)
+      const data = await response.json();
+    
+      if (!response.ok) {
+        console.error('Error sending message');
       }
     }
+
+    
+    catch (error) {
+      console.log("hello2")
+      console.error(error)
+    }
+
+    setSpaceSelected(true)
   }
-
-
-  
-
 
   return (
     <Container>
@@ -98,7 +113,7 @@ function App() {
                 }}}
                 />
               
-              <Button onClick={getDocuments} className="send-button" type="button"> Send </Button>
+              <Button onClick={spaceSelected ? sendToSocket : getDocuments} className="send-button" type="button"> Send </Button>
             </div>
           </div>
 
