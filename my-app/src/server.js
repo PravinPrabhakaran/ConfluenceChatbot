@@ -6,7 +6,7 @@ const axios = require('axios');
 const pdfSaver = require('pdfkit')
 const { spawn } = require('child_process');
 const doc = require('pdfkit');
-const dotenv = require('dotenv').config({ path: '/Users/fahad.hewad/vscode/ConfluenceChatbot/my-app/src/keys.env' });
+const dotenv = require('dotenv').config({ path: './keys.env' });
 
 //Makes an instance of the express application
 const app = express();
@@ -16,6 +16,8 @@ app.use(express.json());
 
 let lastPythonResponse = "";
 let doc_paths = [];
+let pythonProcess;
+
 // Function to remove HTML tags from content
 const removeHtmlTags = (content) => {
   // Remove HTML tags
@@ -78,7 +80,7 @@ app.post('/api/documents', async (req, res) => {
     try {
 
         const spaceAuth = Buffer.from(`${process.env.confluence_email}:${process.env.confluence_API_KEY}`).toString('base64');
-
+        console.log(`${process.env.confluence_email}:${process.env.confluence_API_KEY}`)
         // First API call to get the ID of a Space
         const spaceIDCall = `https://comparethemarket.atlassian.net/wiki/rest/api/space/${spaceName}`
         const spaceIDData = await fetchData(spaceIDCall, spaceAuth);
@@ -113,19 +115,19 @@ app.post('/api/documents', async (req, res) => {
         res.status(500).json({ error: 'Failed to fetch documents' });
       }
 
-      start_python();
+      start_python(res);
 
       // add res that sends back that python is starting
 
 });
 
-const start_python = () => {
+const start_python = (res) => {
 
   const documentPaths = doc_paths
-  doc_paths=[]
   const apiKey = process.env.GPT_API_KEY
+  console.log(doc_paths)
 
-  pythonProcess = spawn('python', ['./run.py', apiKey, ...documentPaths]);
+  pythonProcess = spawn('python3', ['./run.py', apiKey, ...documentPaths]);
 
     // Handle Python process termination or crash
     pythonProcess.on('close', (code) => {
@@ -133,7 +135,24 @@ const start_python = () => {
         // You can restart the Python process or notify the frontend about this
     });
 
-    res.json({ message: 'Python script started' });
+
+    // Handle Python process termination or crash
+  pythonProcess.on('close', (code) => {
+    console.error(`Python script exited with code ${code}`);
+    // You can restart the Python process or take other actions here
+  });
+
+  // Handle Python process output
+  pythonProcess.stdout.on('data', (data) => {
+    console.log(data.toString());
+    // Process the Python script's output here, if needed
+  });
+
+  // Handle Python process errors
+  pythonProcess.stderr.on('data', (data) => {
+    console.error(data.toString()); // Output the error message
+  });
+
 
 }
 
@@ -150,9 +169,10 @@ app.post('/api/send-to-python', (req, res) => {
         // Listen for Python's stdout
         pythonProcess.stdout.on('data', (data) => {
             lastPythonResponse = data.toString();
+            console.log(lastPythonResponse)
         });
         
-        console.log(lastPythonResponse)
+        //console.log(lastPythonResponse)
     }
     
 });

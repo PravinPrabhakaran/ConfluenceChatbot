@@ -20,6 +20,7 @@ function App() {
     setMessages(messages=>[...messages, {text:spaceName, bot:false}])
 
     if (spaceSelected) {
+      console.log("Sending to python the question (send-to-python)")
       const response = await fetch('/api/send-to-python', {
         method: 'POST',
         headers: {
@@ -30,6 +31,9 @@ function App() {
 
     }
     else {
+      console.log("Sending the spacename to collect docs (documents)")
+      setSpaceSelected(spaceSelected=>true)
+      console.log(spaceSelected)
       try {
         const response = await fetch('/api/documents', {
           method: 'POST',
@@ -38,20 +42,19 @@ function App() {
           },
           body: JSON.stringify({ spaceName }),
         });
+
+        const data = await response.json();
       
         if (!response.ok) {
           console.error('Error sending message');
         }
-  
-        const data = await response.json();
+
       }
   
       catch (error) {
         console.log("hello2")
         console.error(error)
       }
-
-      setSpaceSelected(true)
     }
   }
 
@@ -83,7 +86,7 @@ function App() {
           <div className="messageInput">
             <div className="input-container mt-3 d-flex">
               <Form.Control type="text" className="message-input flex-grow-1"
-              
+                name="prompt"
                 placeholder="Enter space name"
                 value={spaceName}
                 onChange={handleInputChange}
@@ -106,12 +109,3 @@ function App() {
 }
 
 export default App;
-
-/** 
-{content.map((item) => (
-  <body>
-    <h3>{item.title}</h3>
-    <p>{item.body}</p>
-  </body>
-
-*/
