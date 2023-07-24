@@ -198,6 +198,8 @@ const start_python = (websocketClient) => {
 
   // Handle Python process output - Sends received data through Websocket
   pythonProcess.stdout.on('data', (data) => {
+    console.log(data.toString())
+
     if (activeWebSockets.has(pythonProcess)) {
       const client = activeWebSockets.get(pythonProcess);
       if (client.readyState === WebSocket.OPEN) {

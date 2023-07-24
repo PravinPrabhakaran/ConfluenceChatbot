@@ -43,6 +43,7 @@ while True:
     print2("Enter a question or type q to quit")
     question = sys.stdin.readline().strip()
     print2(question)
+    question += ". Tell me in 3 sentences"
     if question == "q":
         print2("trying to quit - python")
         break
