@@ -11,12 +11,14 @@ const http = require('http');
 const WebSocket = require('ws');
 const cors = require('cors');
 
+
 //Makes an instance of the express application
 const app = express();
 
 //Parses incoming JSON 
 app.use(express.json());
 app.use(cors())
+
 
 let lastPythonResponse = "";
 let doc_paths = [];
@@ -168,7 +170,9 @@ wss.on('connection', (client) => {
   });
 })
 
-
+wss.on('listening', () => {
+  console.log('WebSocket Server is listening on port 5000');
+});
 
 
 const start_python = (websocketClient) => {
@@ -226,6 +230,6 @@ const sendInput = (message, pythonProcess) => {
 }
 
 const port = 5000;
-app.listen(port, ()=> {
+server.listen(port, ()=> {
     console.log(`Server is running on port ${port}`)
 })

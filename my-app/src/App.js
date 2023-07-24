@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form } from 'react-bootstrap';
 import Chatbox from './Chatbox.js';
-import { w3cwebsocket as WebSocketClient } from 'ws';
+import { w3cwebsocket as WebSocketClient } from 'websocket';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
