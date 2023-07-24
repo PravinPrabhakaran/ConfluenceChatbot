@@ -2,7 +2,7 @@ import './App.css';
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form } from 'react-bootstrap';
 import Chatbox from './Chatbox.js';
-import { w3cwebsocket as WebSocketClient } from 'websocket';
+import { w3cwebsocket as WebSocketClient } from 'ws';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
@@ -18,7 +18,10 @@ function App() {
   };
 
   useEffect(() => {
+    console.log("made it to space selection")
+    console.log(spaceSelected)
     if (spaceSelected) {
+      console.log("opening web socket")
       const client = new WebSocketClient('ws://localhost:5000'); // Replace with your backend WebSocket server URL
       client.onopen = () => {
         console.log('WebSocket Client Connected');
@@ -42,14 +45,16 @@ function App() {
     }
   }, [spaceSelected]);
  
-  const sendToSocket = (message) => {
+  const sendToSocket = () => {
+    var message = document.getElementsByName("prompt")[0].value
     if (websocketClient && websocketClient.readyState === WebSocket.OPEN) {
       websocketClient.send(message);
     }
+    document.getElementsByName("prompt")[0].value = ""
   };
 
   var getDocuments = async () => {
-
+    console.log("documents")
     setMessages(messages=>[...messages, {text:spaceName, bot:false}])
 
     try {
@@ -108,7 +113,12 @@ function App() {
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                   e.preventDefault();
-                  getDocuments()
+                  if (spaceSelected) {
+                    sendToSocket()
+                  }
+                  else {
+                    getDocuments()
+                  }
                   document.getElementsByName("prompt")[0].value = ""
                 }}}
                 />

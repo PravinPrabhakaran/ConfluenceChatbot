@@ -9,12 +9,14 @@ const doc = require('pdfkit');
 const dotenv = require('dotenv').config({ path: './keys.env' });
 const http = require('http');
 const WebSocket = require('ws');
+const cors = require('cors');
 
 //Makes an instance of the express application
 const app = express();
 
 //Parses incoming JSON 
 app.use(express.json());
+app.use(cors())
 
 let lastPythonResponse = "";
 let doc_paths = [];
@@ -134,9 +136,9 @@ app.post('/api/documents', async (req, res) => {
 
 
 wss.on('connection', (client) => {
-
-  ws.on('message', (message) => {
-    
+  console.log("connection message")
+  client.on('message', (message) => {
+    console.log("message received")
     for (const [pythonProcess, connectedSocket] of activeWebSockets) {
       if (client == connectedSocket) {
         sendInput(message, pythonProcess)
@@ -150,7 +152,7 @@ wss.on('connection', (client) => {
     
   });
 
-  ws.on('close', () => {
+  client.on('close', () => {
     console.log('WebSocket Client Disconnected');
     // Remove the WebSocket connection from activeConnections when it's disconnected
     for (const [pythonProcess, connectedSocket] of activeWebSockets) {
