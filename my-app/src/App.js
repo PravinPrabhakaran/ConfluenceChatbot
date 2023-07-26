@@ -32,7 +32,9 @@ function App() {
       };
 
       client.onmessage = (message) => {
-        setMessages((messages) => [message, ...messages]);
+        console.log(message.data)
+        setMessages(messages=>[...messages, {text:message.data, bot:false}]);
+        console.log(messages)
       };
 
       client.onclose = () => {
