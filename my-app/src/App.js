@@ -1,26 +1,69 @@
 import './App.css';
 import React, { useState, useEffect } from 'react';
 import { Container, Card, Button, Form } from 'react-bootstrap';
-import Chatbox from './Chatbox.js'
+import Chatbox from './Chatbox.js';
+import { w3cwebsocket as WebSocketClient } from 'websocket';
 
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
   
   const [spaceName, setSpaceName] = useState("")
-  const [spaceSelected, setSpaceSelected] = useState(false)
   const [messages, setMessages] = useState([])
+  const [websocketClient, setWebsocketClient] = useState(null);
+  const [spaceSelected, setSpaceSelected] = useState(false);
 
   const handleInputChange = (event) => {
     setSpaceName(event.target.value);
   };
 
-  var getDocuments = async () => {
+  useEffect(() => {
+    console.log("made it to space selection")
+    console.log(spaceSelected)
+    if (spaceSelected) {
+      console.log("opening web socket")
+      const client = new WebSocketClient('ws://localhost:5000'); // Replace with your backend WebSocket server URL
+      client.onopen = () => {
+        console.log('WebSocket Client Connected');
+        setWebsocketClient(client);
+        var message = document.getElementsByName("prompt")[0].value
+        client.send(message);
+        document.getElementsByName("prompt")[0].value = ""
+      };
 
+      client.onmessage = (message) => {
+        setMessages((messages) => [message, ...messages]);
+      };
+
+      client.onclose = () => {
+        console.log('WebSocket Client Disconnected');
+        setWebsocketClient(null);
+      };
+      
+
+      return () => {
+        if (client) {
+          client.close();
+        }
+      };
+      
+    }
+  }, [spaceSelected]);
+ 
+  const sendToSocket = () => {
+    var message = document.getElementsByName("prompt")[0].value
+    if (websocketClient && websocketClient.readyState === WebSocket.OPEN) {
+      websocketClient.send(message);
+    }
+    document.getElementsByName("prompt")[0].value = ""
+  };
+
+  var getDocuments = async () => {
+    console.log("documents")
     setMessages(messages=>[...messages, {text:spaceName, bot:false}])
 
-    if (spaceSelected) {
-      const response = await fetch('/api/send-to-python', {
+    try {
+      const response = await fetch('/api/documents', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -28,36 +71,21 @@ function App() {
         body: JSON.stringify({ spaceName }),
       });
 
+      const data = await response.json();
+    
+      if (!response.ok) {
+        console.error('Error sending message');
+      }
     }
-    else {
-      try {
-        const response = await fetch('/api/documents', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({ spaceName }),
-        });
-      
-        if (!response.ok) {
-          console.error('Error sending message');
-        }
-  
-        const data = await response.json();
-      }
-  
-      catch (error) {
-        console.log("hello2")
-        console.error(error)
-      }
 
-      setSpaceSelected(true)
+    
+    catch (error) {
+      console.log("hello2")
+      console.error(error)
     }
+
+    setSpaceSelected(true)
   }
-
-
-  
-
 
   return (
     <Container>
@@ -83,19 +111,24 @@ function App() {
           <div className="messageInput">
             <div className="input-container mt-3 d-flex">
               <Form.Control type="text" className="message-input flex-grow-1"
-              
+                name="prompt"
                 placeholder="Enter space name"
                 value={spaceName}
                 onChange={handleInputChange}
                 onKeyPress={(e) => {
                   if (e.key === 'Enter') {
                   e.preventDefault();
-                  getDocuments()
+                  if (spaceSelected) {
+                    sendToSocket()
+                  }
+                  else {
+                    getDocuments()
+                  }
                   document.getElementsByName("prompt")[0].value = ""
                 }}}
                 />
               
-              <Button onClick={getDocuments} className="send-button" type="button"> Send </Button>
+              <Button onClick={spaceSelected ? sendToSocket : getDocuments} className="send-button" type="button"> Send </Button>
             </div>
           </div>
 
@@ -106,12 +139,3 @@ function App() {
 }
 
 export default App;
-
-/** 
-{content.map((item) => (
-  <body>
-    <h3>{item.title}</h3>
-    <p>{item.body}</p>
-  </body>
-
-*/
