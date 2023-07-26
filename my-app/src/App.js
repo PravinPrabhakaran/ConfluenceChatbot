@@ -39,7 +39,6 @@ function App() {
         console.log('WebSocket Client Disconnected');
         setWebsocketClient(null);
       };
-      
 
       return () => {
         if (client) {
