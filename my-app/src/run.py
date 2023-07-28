@@ -41,9 +41,6 @@ for d in my_docs:
 
 print2("Added doc paths to Docs object")
 
-print3("answer")
-
-"""
 while True:
     print2("Enter a question or type q to quit")
     question = sys.stdin.readline().strip()
@@ -57,5 +54,3 @@ while True:
         print3(answer.formatted_answer)
 
     print2("working")
-
-"""

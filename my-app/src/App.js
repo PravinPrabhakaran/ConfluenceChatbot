@@ -34,7 +34,6 @@ function App() {
       client.onmessage = (message) => {
         console.log(message.data)
         setMessages(messages=>[...messages, {text:message.data, bot:false}]);
-        console.log(messages)
       };
 
       client.onclose = () => {
@@ -53,6 +52,7 @@ function App() {
  
   const sendToSocket = () => {
     var message = document.getElementsByName("prompt")[0].value
+    setMessages(messages=>[...messages, {text:spaceName, bot:false}])
     if (websocketClient && websocketClient.readyState === WebSocket.OPEN) {
       websocketClient.send(message);
     }
@@ -87,6 +87,8 @@ function App() {
 
     setSpaceSelected(true)
   }
+
+  console.log(messages)
 
   return (
     <Container>
