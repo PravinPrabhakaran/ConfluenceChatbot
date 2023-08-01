@@ -88,10 +88,8 @@ function App() {
     setSpaceSelected(true)
   }
 
-  console.log(messages)
-
   return (
-    <Container>
+    <div className="container-fluid">
     
     <div className="App">
         <h1>Confluence Chatbot</h1>
@@ -137,7 +135,7 @@ function App() {
 
       
     </div>
-  </Container>
+  </div>
   );
 }
 
