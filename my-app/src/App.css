@@ -1,18 +1,18 @@
 .App {
   text-align: center;
+  margin-left:25%;
+  margin-right:25%;
   margin-top: 3%;
-  margin-left: 5%;
-  margin-right: 5%;
-  border: 1px solid red;
+  
 }
 
 .messageContainer {
   display:flex;
+  background-color: black;
   justify-content: center;
   height: 80vh;
   border-radius: 1%;
   overflow-y: auto;
-  border: 1px solid red;
 
 }
 
@@ -31,16 +31,9 @@
 }
 
 .chat-box {
-  font-size: 1.3em;
-
+  font-size:11pt;
+  max-width:90%;
   text-overflow: wrap;
   margin-top: 3%;
   text-align:left; 
 }
-
-.test {
-  background-color: #005c4b !important;
-  
-  color: rgb(0, 0, 0) !important;
-}
-
